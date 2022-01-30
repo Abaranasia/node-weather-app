@@ -1,11 +1,14 @@
 
+const fs = require('fs');
+
 const axios = require('axios').default;
 
 class Searches {
-    log = ['Barcelona', 'Valencia', 'Tegicigalpa', 'Madrid'];
+    log = []; // Stores last 5 searches
+    dbPath = './db/database.json';
 
     constructor() {
-        // check if DB exists
+        this.readFromDB();
     }
 
     async cities(place = '') {
@@ -43,6 +46,14 @@ class Searches {
         }
     };
 
+    get capitalizedLog() {
+        return this.log.map(place => {
+            let words = place.split(' ');
+            words = words.map(w => w[0].toUpperCase() + w.substring(1));
+            return words.join(' ');
+        })
+    }
+
     //http request
     async weatherPlace(lat, lon) {
         try {
@@ -70,13 +81,34 @@ class Searches {
     addToLog(place = '') {
         // skip dups
         if (this.log.includes(place.toLocaleLowerCase())) {
-
+            return;
         }
-        this.log.unshift(place);
+        this.log.unshift(place.toLocaleLowerCase());
 
+        // store inf in the DB
+        this.saveToDB();
+    };
+
+    saveToDB() {
+        const payload = {
+            log: this.log
+        };
+
+        fs.writeFileSync(this.dbPath, JSON.stringify(payload));
+    };
+
+    readFromDB() {
+        // check if DB exists
+        if (!fs.existsSync(this.dbPath)) {
+            return null;
+        };
+
+        const info = fs.readFileSync(this.dbPath, { encoding: 'utf-8' });
+        const data = JSON.parse(info)
+        // console.log(data);
+
+        this.log = data.log;  // Load the info from db into log array
     }
-
-
 }
 
 module.exports = Searches;

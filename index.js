@@ -53,7 +53,7 @@ const main = async () => {
                     break;
                 case 2: // List all tasks
 
-                    searches.log.forEach((place, i) => {
+                    searches.capitalizedLog.forEach((place, i) => {
                         const idx = `${i + 1}. `.green;
                         console.log(`${idx} ${place}`);
                     })
